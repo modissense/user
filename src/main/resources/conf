@@ -1,0 +1,20 @@
+# this is a configuration file used to set the database parameters to the modissense platform
+# the parameters name is pretty much self-explicable.
+
+# IMPORTANT: if an IPv6 address is set for DATABASE_HOST instead of a host name,
+# brackets should be placed
+# e.g.
+#	DATABASE_HOST	[ff:ff:ff:ff:ff:ff:ff]
+# IPv4 and hostnames can be put without brackets
+
+# the keys (parameters name) are separated from their values with a tab (\t) character. You may use as many tabs as you
+# want for alignments reasons but you MUST NOT replace the tab with a set of spaces
+
+# Finally, changing the predefined parameter names is never a good idea. The parameters names is set this way for a reason ;)
+
+
+DATABASE_HOST		dbserver
+DATABASE_PORT		5432
+DATABASE_USERNAME	root
+DATABASE_PASSWORD	root
+DATABASE_NAME		modissense
