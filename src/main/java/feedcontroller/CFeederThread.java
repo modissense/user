@@ -142,7 +142,7 @@ public class CFeederThread extends Thread{
 							UserPoiStruct userPOIKey = new UserPoiStruct('f', Long.parseLong(c.getUser()), poiid);
 							ModissenseText commentText = new ModissenseText();
 							commentText.setText(c.getComment());
-							commentText.setTimestamp(checkin.getCreatedAt());
+							commentText.setTimestamp(checkin.getCreatedAt().getTime());
 							
 							Configuration conf = new Configuration(true);
 							try {

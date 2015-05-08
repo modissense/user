@@ -149,6 +149,7 @@ public abstract class DatabaseTransaction {
 		if(temp.length()>0)
 			temp = " WHERE "+temp.substring(0,temp.length()-5);
 		sql=sql+temp;
+		System.out.println(sql);
 		return executeSQLWithoutResults(sql);
 	}
 		

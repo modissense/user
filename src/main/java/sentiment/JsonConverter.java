@@ -76,13 +76,14 @@ class JsonConverter {
 				src.close();
 				System.exit(0);
 			}
-
 			JSONObject jsonLine = (JSONObject) array.get(0);
 			String review=null,reviewTitle=null,title = null,rating=null;
 			
 			JSONArray reviewArray = (JSONArray) jsonLine.get("review");
-			if(reviewArray.size()>0)
+			if(reviewArray.size()>0){
 				review = (String) reviewArray.get(0);
+				review = review.substring(0,review.length()-2);
+			}
 			
 			rating = jsonLine.get("rating").toString();
 			
@@ -91,19 +92,22 @@ class JsonConverter {
 				reviewTitle = (String) reviewTitleArray.get(0);
 			
 			JSONArray titleArray = (JSONArray) jsonLine.get("title");
-			if(titleArray.size()>0){
-				try{
+			if(titleArray.size()>1){
 				title = (String) titleArray.get(1);
-				}catch(ArrayIndexOutOfBoundsException e){
-					continue;
-				}
-			}
+				//title = title.substring(0,title.length()-2);
+			}else title = (String) titleArray.get(0);
 			
 			double longitude=0, latitude=0;
-			if(jsonLine.containsKey("longitude"))
-				longitude = Double.parseDouble(jsonLine.get("longitude").toString());
-			if(jsonLine.containsKey("longitude"))
-				latitude = Double.parseDouble(jsonLine.get("latitude").toString());
+			if(jsonLine.containsKey("longitude")){
+				String longStr = jsonLine.get("longitude").toString();
+				if(longStr.contains("E")) continue;
+				longitude = Double.parseDouble(longStr);
+			}
+			if(jsonLine.containsKey("latitude")){
+				String latString = jsonLine.get("latitude").toString();
+				if(latString.contains("E")) continue;
+				latitude = Double.parseDouble(latString);
+			}
 
 			if(review==null||rating==null)
 				continue;
@@ -112,27 +116,25 @@ class JsonConverter {
 			try{
 				finalRating = rating.charAt(2);
 			}
-			catch(ArrayIndexOutOfBoundsException e){
+			catch(Exception e){
 				continue;
 			}
 			
 			if(title!=null&&!(latitude==0&&longitude==0)){
 				title = title.replaceAll("\n", "");
-				String poiOutput = title+"\t"+latitude+"\t"+longitude+"\n";
-				poisBufWriter.append(poiOutput);
+				String poiOutput = title+"\t"+latitude+"\t"+longitude;
+				poisBufWriter.append(poiOutput+"\n");
 			}
 
 			String textTrainOutput;
-			
-			review = review.replaceAll("\n", " ");
-			
-			if(reviewTitle!=null){
-				reviewTitle = reviewTitle.replaceAll("\n", " ");
-				textTrainOutput = finalRating+"\t"+reviewTitle+" "+review+"\n";
-			}
+			title = title.replaceAll("\n", "");
+			reviewTitle = reviewTitle.replaceAll("\n", "");
+			review = review.replaceAll("\n", "");
+			if(reviewTitle!=null)
+				textTrainOutput = title+"\t"+finalRating+"\t"+reviewTitle+" "+review;
 			else
-				textTrainOutput = finalRating+"\t"+review+"\n";
-			textBufWriter.append(textTrainOutput);
+				textTrainOutput = title+"\t"+finalRating+"\t"+review;
+			textBufWriter.append(textTrainOutput+"\n");
 			
 			
 		}

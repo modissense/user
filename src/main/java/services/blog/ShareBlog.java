@@ -134,7 +134,12 @@ public class ShareBlog extends HttpServlet {
 					description+=sundesmoi[rnd.nextInt(sundesmoi.length)];
 				}
 				
-				description+=results.get(i).get("name")+" ("+results.get(i).get("comment")+")";
+				description+=results.get(i).get("name");
+				
+				if(results.get(i).get("comment")!=null){
+					description+=" ("+results.get(i).get("comment")+")";
+				}
+				
 				if(results.get(i).get("arrived")!=null&&results.get(i).get("off")!=null){
 					description+=" και παρέμεινα εκεί "+GetMicroBlog.getDuration(results.get(i).get("arrived"),results.get(i).get("off"));
 				}
@@ -154,6 +159,7 @@ public class ShareBlog extends HttpServlet {
 			}
 			
 			googleMapsURL+=googleMapsPath;
+			String shortenedUrl = shortenLongURL(googleMapsURL);
 			
 			for(String sn:socialNetworks){
 				
@@ -177,19 +183,21 @@ public class ShareBlog extends HttpServlet {
 					if(sn.equals("facebook")){
 						
 						URL url = new URL("https://graph.facebook.com/"+snKey+"/feed?access_token="+accessToken);
-						 
+						System.out.println("Share blog call: "+"https://graph.facebook.com/"+snKey+"/feed?access_token="+accessToken);
+						
 						HttpsURLConnection conn =(HttpsURLConnection) url.openConnection();conn.setRequestMethod("POST");
 						conn.setRequestProperty("charset", "utf-8");
 						conn.setDoOutput(true);
 					     
 						String postBody = "message="+description+"\n&";
-						postBody+="link="+googleMapsURL;
+						//postBody+="link="+googleMapsURL;
+						postBody+="link="+shortenedUrl;
 						System.out.println(postBody);
-						 
+						System.out.println(); 
 						byte[] data = postBody.getBytes("UTF-8");
 						OutputStream output = conn.getOutputStream();
 						output.write(data);
-						output.close();
+						
 						 
 					    StringBuffer answer = new StringBuffer();
 			   	        BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -198,9 +206,10 @@ public class ShareBlog extends HttpServlet {
 					           answer.append(line);
 					    }
 					    reader.close();
-					   
+					    output.close();
 					    String answerString = answer.toString();
 					    System.out.println(answerString);
+					    
 					    serviceResults.put("facebook", "true");
 					}else if(sn.equals("twitter")){
 				
@@ -208,7 +217,7 @@ public class ShareBlog extends HttpServlet {
 						HttpSession session = request.getSession();
 						session.setAttribute("accessToken", accessToken);
 						session.setAttribute("accessTokenSecret", accessTokenSecret);
-						u.postStatus(shortenLongURL(googleMapsURL));
+						u.postStatus(shortenedUrl);
 						serviceResults.put("twitter", "true");
 					}
 				

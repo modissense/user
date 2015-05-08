@@ -43,7 +43,7 @@ public class Classifier {
     	configuration.addResource(new Path(HADOOP_CONF+"mapred-site.xml"));
    
         dictionary = readDictionnary(configuration, new Path(DICTIONARY_PATH_CONF));
-        
+        documentFrequency = readDocumentFrequency(configuration, new Path(DOCUMENT_FREQUENCY_PATH_CONF));
         analyzer = new SimpleAnalyzer(Version.LUCENE_43);
 
         NaiveBayesModel model = NaiveBayesModel.materialize(new Path(MODEL_PATH_CONF), configuration);
@@ -99,7 +99,8 @@ public class Classifier {
                 bestCategoryId = categoryId;
             }
         }
- 
+        ts.close();
+        System.out.println("double score: "+bestScore);
         return bestCategoryId;
     }
  
@@ -117,6 +118,21 @@ public class Classifier {
             documentFrequency.put(pair.getFirst().get(), pair.getSecond().get());
         }
         return documentFrequency;
+    }
+    
+    public static void main(String[] args){
+    	Configuration conf = new Configuration(true);
+		try {
+			System.out.println("I am in try-catch");
+			Classifier classifier = new Classifier(conf);
+			System.out.println(args[0]);
+			int score = classifier.classify(args[0]);
+			System.out.println("text: "+args[0]+" Score:"+score);
+		} catch (IOException e1) {
+			System.out.println("Shit happen");
+			e1.printStackTrace();
+		}
+		
     }
  
 }

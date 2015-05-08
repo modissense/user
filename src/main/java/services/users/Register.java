@@ -172,7 +172,7 @@ public class Register extends HttpServlet {
 					     String state = (new BigInteger(130, random).toString(32));
 						 session.setAttribute("state", state);
 						 
-						 String permissions = "read_friendlists,read_stream,publish_actions,email,user_photos,user_friends";
+						 String permissions = "read_friendlists,read_stream,publish_actions,email,user_photos,user_friends,user_posts";
 						 //permissions+=",read_mailbox";
 						 
 						 response.sendRedirect("https://www.facebook.com/dialog/oauth?client_id="+fbAppID+"&redirect_uri="+

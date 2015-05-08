@@ -20,8 +20,10 @@ import javax.servlet.http.HttpSession;
 
 import modisusers.FriendIDs;
 import modisusers.FriendsInfo;
-import modisusers.UserIdStruct;
+import modisusers.SNFriendsGetter;
+import gr.ntua.ece.cslab.modissense.queries.containers.UserIdStruct;
 
+import org.apache.hadoop.hbase.client.Put;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -134,6 +136,7 @@ public class UserInfo extends HttpServlet {
 					
 					jsonToSend+="{\"network\":\"facebook\",\"friends\":[";
 					uStruct = new UserIdStruct('F',Long.parseLong(results.get(i).get("sn_identifier")));
+					System.out.println("UserInfo for user: "+uStruct.getC()+uStruct.getId());
 					
 				}else{
 					jsonToSend+="{\"network\":\"foursquare\",\"friends\":[";
@@ -142,20 +145,36 @@ public class UserInfo extends HttpServlet {
 				
 				UserGraph hbaseUserTable = new UserGraph();
 				FriendsInfo userFriends = hbaseUserTable.getUserFriendsInfo(uStruct);
-				if(userFriends!=null){
-					LinkedList<String> names = userFriends.getFriendNames();
+				
+				LinkedList<String> names;
+				if(userFriends!=null&&!(names = userFriends.getFriendNames()).isEmpty()){
+					System.out.println("FRIENDS FETCHED FROM HBase");
+					// if information exists in HBase, retrieve it from there.
+					
+					//LinkedList<String> names = userFriends.getFriendNames();
 					LinkedList<String> urls = userFriends.getFriendsImages();
 					FriendIDs fIds = hbaseUserTable.getUserFriendsIDs(uStruct);
 					LinkedList<byte[]> friendIds = fIds.getFriends();
 					
+					System.out.println("User Info Friends:");
 					for(int n=0;n<names.size();n++){
 						UserIdStruct snUser = new UserIdStruct();
 						snUser.parseBytes(friendIds.get(n));
+						
+						System.out.print(snUser.getC()+snUser.getId()+",");
+						
 						jsonToSend+="{\"id\":\""+snUser.getId()+"\",\"name\":\""+names.get(n)+"\",\"url\":\"" +
 				    	 		urls.get(n)+"\"}";
 					}
+					System.out.println();
+				}else{
+					System.out.println("FRIENDS FEETCHED FROM NETWORK");
+					// otherwise, fetch available information from social network and persist it in database
+					//System.out.println("MPIKA EDW KAI VRIKA FILOUS - "+results.get(i).get("sn_name"));
+					
+					jsonToSend+=retrieveFriendsFromSN(results.get(i).get("sn_name"), results.get(i).get("sn_identifier"), 
+							results.get(i).get("sn_token"),results.get(i).get("sn_token_secret"));
 				}
-				
 			    jsonToSend = jsonToSend.replaceAll("\\}\\{", "},{");
 			    jsonToSend+="]}";
 				
@@ -186,4 +205,72 @@ public class UserInfo extends HttpServlet {
 		// does nothing for now
 	}
 
+	public String retrieveFriendsFromSN(String network,String snid,String token,String tokenSecret){
+		LinkedList<Put> hbasePuts = new LinkedList<>();
+		SNFriendsGetter snGetter;
+		String jsonToReturn="";
+		
+		char FACEBOOK = 'F';
+		char FOURSQUARE = 'f';
+		char TWITTER = 't';
+		
+		if(network.equals("facebook")){
+			snGetter = new SNFriendsGetter(snid, token);
+			snGetter.setSocialNetwork(FACEBOOK);
+			try {
+				snGetter.getFacebookFriends();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}	
+		}else if(network.equals("foursquare")){
+			snGetter = new SNFriendsGetter(snid, token);
+			snGetter.setSocialNetwork(FOURSQUARE);
+			try {
+				snGetter.getFoursquareFriends();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}else{
+			snGetter = new SNFriendsGetter(snid, token,tokenSecret);
+			snGetter.setSocialNetwork(TWITTER);
+			try {
+				snGetter.getTwitterFriends();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		LinkedList<String> fids = snGetter.getFriendIDs();
+		HashMap<String, String> fNames = snGetter.getFriendNames();
+		HashMap<String, String> fImages = snGetter.getFriendImages();
+		
+		FriendIDs newFriend = new FriendIDs(snGetter.getSocialNetwork(),Long.parseLong(snid));
+		FriendsInfo fInfo = new FriendsInfo(snGetter.getSocialNetwork(), Long.parseLong(snid));
+		for(String id:fids){
+			newFriend.addFriend(Long.parseLong(id));
+			fInfo.addFriendName(fNames.get(id));
+			fInfo.addFriendImage(fImages.get(id));
+			
+			jsonToReturn+="{\"id\":\""+id+"\",\"name\":\""+fNames.get(id)+"\",\"url\":\"" +
+					fImages.get(id)+"\"}";
+			
+		}
+		
+		UserGraph usersTable = new UserGraph();
+		hbasePuts.add(usersTable.storeFriend(newFriend));
+		hbasePuts.add(usersTable.storeFriendInfo(fInfo));
+		
+		try {
+			usersTable.commitUpdates(hbasePuts);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println("Updates are commited.");
+
+		return jsonToReturn;
+	}
+	
+	
+	
 }

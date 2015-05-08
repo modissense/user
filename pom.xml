@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>gr.ntua.ece.cslab</groupId>
     <artifactId>user</artifactId>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <version>0.1-SNAPSHOT</version>
     <dependencies>
         <dependency>
@@ -31,7 +31,7 @@
         <dependency>
             <groupId>org.apache.mahout</groupId>
             <artifactId>mahout-core</artifactId>
-            <version>0.9</version>
+            <version>0.8</version>
         </dependency>
         <dependency>
             <groupId>net.minidev</groupId>
@@ -99,5 +99,17 @@
         <system>Jenkins</system>
         <url>http://snf-618752.vm.okeanos.grnet.gr:8080</url>
     </ciManagement>
+    
+        <repositories>
+        <repository>
+            <id>Modissense NEXUS Repository -  SNAPSHOTS</id>
+            <url>http://snf-618787.vm.okeanos.grnet.gr/nexus/content/repositories/modissense</url>
+        </repository>
+        <repository>
+            <id>Modissense NEXUS Repository -  RELEASES</id>
+            <url>http://snf-618787.vm.okeanos.grnet.gr/nexus/content/repositories/modissense-release</url>
+        </repository>
+    </repositories>
+
 
 </project>

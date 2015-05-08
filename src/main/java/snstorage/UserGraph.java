@@ -8,12 +8,13 @@ import java.util.LinkedList;
 
 import modisusers.FriendIDs;
 import modisusers.FriendsInfo;
-import modisusers.UserIdStruct;
+import gr.ntua.ece.cslab.modissense.queries.containers.UserIdStruct;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
@@ -184,6 +185,27 @@ public class UserGraph{
 	}
 	
 	/**
+	 * deletes specified user.(only for test purposes)
+	 * @param sn
+	 * @param id
+	 * @throws IOException
+	 */
+			
+	public void deleteUser(String sn,long id) throws IOException{
+		UserIdStruct user = new UserIdStruct(sn.charAt(0), id);
+		createConnectionToHTable();
+		LinkedList<String> names = getUserFriendsInfo(user).getFriendNames();
+		for(String s:names){
+			System.out.print(s+" ");
+		}
+		Delete del  = new Delete(user.getBytes());
+		del.deleteFamily(COLUMN_FAMILY1.getBytes());
+		del.deleteFamily(COLUMN_FAMILY2.getBytes());
+		table.delete(del);
+		closeConnectionToHTable();
+	}
+	
+	/**
 	 * get a specific row.This method is useful only for testing
 	 * purposes.
 	 * @param key
@@ -199,6 +221,7 @@ public class UserGraph{
 		Get get = new Get(user.getBytes());
 		Result r = table.get(get);
 		byte[] value = r.getValue(Bytes.toBytes(COLUMN_FAMILY1), Bytes.toBytes(QUALIFIER));
+		System.out.println("YOOHOO "+value);
 		FriendIDs ids = new FriendIDs(user.getC(), user.getId());
 		ids.parseCompressedBytes(value);
 		System.out.println("ids");
@@ -227,6 +250,7 @@ public class UserGraph{
 		System.out.println("This program manages the ModisUsers Hbase table.");
 		System.out.println("In order to create ModisUsers table press:\tc/C");
 		System.out.println("In order to delete ModisUsers table press:\td/D");
+		System.out.println("In order to delete giagkos user press:\tdu");
 		System.out.println("In order to get a specific row press:\tg");
 		
 		try{
@@ -242,6 +266,11 @@ public class UserGraph{
 				System.out.println("Delete ModisUsers.");
 				UserGraph schema = new UserGraph();
 				schema.dropTable();
+			}
+			else if(option.equals("du")){
+				System.out.println("Delete Giagkos Facebook.");
+				UserGraph schema = new UserGraph();
+				schema.deleteUser("F", 	605109625);
 			}
 			else if(option.equals("g")){
 				if(args.length!=1){

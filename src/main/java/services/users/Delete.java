@@ -45,12 +45,12 @@ public class Delete extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		if(request.getParameter("info")!=null){
 			response.getOutputStream().print(this.description.serialize());
-		} else if(request.getParameter("token")==null){
+		} else if(request.getParameter("token")==null||request.getParameter("token").equals("null")){
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		} else {
 			HttpSession session = request.getSession();
 			String token = (String) request.getParameter("token");
-			
+			System.out.println("Delete Service");
 			System.out.println("token = "+token);
 			PersistentHashMapClient hashClient = new PersistentHashMapClient();
 			int usid = hashClient.getUserId(token);
@@ -63,7 +63,7 @@ public class Delete extends HttpServlet {
 			String socialNetwork = (String) request.getParameter("network");
 			if(socialNetwork!=null){
 				
-				System.out.println("Network Param Specified");
+				System.out.println("Network Param Specified-Disconnect Account");
 				
 				socialNetworks.setSnName(socialNetwork);
 				
@@ -103,7 +103,7 @@ public class Delete extends HttpServlet {
 				}
 			}else{
 				
-				System.out.println("Delete everything");
+				System.out.println("Delete everything--Delete account");
 				
 				if(socialNetworks.delete()){
 					System.out.println("account deleted successfully");

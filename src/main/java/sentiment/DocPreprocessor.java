@@ -37,11 +37,16 @@ public class DocPreprocessor {
 		String line = null;
 		System.out.println("Starting..");
 		while ((line = src.readLine()) != null) {
+			//System.out.println(line);
 			String[] tokens = line.split("\\s+",2);
-			if (tokens[1].isEmpty())
-				continue;
+			if(tokens.length>1)
+				if (tokens[1].isEmpty())
+					continue;
 			String newLine = tokens[0] + "\t";
-			String restLine = tokens[1];
+			String restLine;
+			if(tokens.length==1) restLine = tokens[0];
+			else if(tokens.length>1) restLine = tokens[1];
+			else continue;
 			
 			restLine = restLine.replace("\\u", " ");
 			restLine = restLine.replace("\\n", " ");
@@ -291,6 +296,35 @@ public class DocPreprocessor {
 		src.close();
 		dst.close();
 
+		
+	}
+	
+	public static void main(String args[]) throws IOException{
+//		DocPreprocessor dp = new DocPreprocessor();
+//		dp.removeSymbols(args[0], args[1]);
+		
+			BufferedReader src = null;
+			src = new BufferedReader(new FileReader(args[0]));
+			BufferedWriter dst = null;
+			dst = new BufferedWriter(new FileWriter(args[1], false));
+
+			String line = null;
+			System.out.println("Starting..");
+			String currentLine="";
+			while ((line = src.readLine()) != null) {
+				String[] tokens = line.split("\t");
+				
+				if(tokens.length>0){
+					if(tokens[0].equals("1")||tokens[0].equals("5")){
+						dst.append(currentLine+"\n");
+						currentLine=line;
+					}
+					else {currentLine+=" "+line;}
+				}
+				
+			}
+			src.close();
+			dst.close();
 		
 	}
 

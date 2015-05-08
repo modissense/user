@@ -79,7 +79,6 @@ public class UpdateBlog extends HttpServlet {
 				List<HashMap<String, String>> results = blogToUpdate.read();
 				
 				if(results.size()==1){
-				System.out.println("right path");
 				if(request.getParameter("delete").equals("false")){
 					String arrived,off,comment;
 					Integer newSeqId,newPoiID;
@@ -102,7 +101,6 @@ public class UpdateBlog extends HttpServlet {
 					if(blogToUpdate.updateBlog(newSeqId,newPoiID, arrived, off, comment)){
 						answer="{\"result\":\"true\"}";
 					}else{
-						System.out.println("gamw to kerato");
 						answer="{\"result\":\"false\"}";
 					}
 				}else{
@@ -113,7 +111,6 @@ public class UpdateBlog extends HttpServlet {
 					}
 				}
 				}else{
-					System.out.println("what the hell??");
 					answer="{\"result\":\"false\"}";
 				}
 				
