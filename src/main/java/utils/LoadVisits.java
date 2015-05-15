@@ -153,6 +153,7 @@ public class LoadVisits {
 										
 					ModissenseText text = new ModissenseText();
 					text.setText(parts[1]);
+					text.setScore(score);
 					text.setTimestamp(timestamp);
 					
 					insertText.setText(text);

@@ -40,7 +40,7 @@ public class TextRepo{
 		UserPoiStruct pu1 = new UserPoiStruct(SMALLEST_SN,0L, 0L);
 		MIN_INITIAL_KEY = pu1.getBytes();
 		
-		UserPoiStruct pu2 = new UserPoiStruct(SMALLEST_SN, 0L,INIT_NUM_OF_POIS);
+		UserPoiStruct pu2 = new UserPoiStruct(SMALLEST_SN, INIT_NUM_OF_POIS,0L);
 		MAX_INITIAL_KEY = pu2.getBytes();
 	}
 	
