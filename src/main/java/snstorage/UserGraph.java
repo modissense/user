@@ -1,6 +1,8 @@
 package snstorage;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
@@ -89,6 +91,14 @@ public class UserGraph{
 		admin.close();
 	}
 	
+	public HTable getTable() {
+		return table;
+	}
+
+	public void setTable(HTable table) {
+		this.table = table;
+	}
+
 	public void createConnectionToHTable(){
 		Configuration config = HBaseConfiguration.create();
 		HTable table = null;
@@ -245,6 +255,46 @@ public class UserGraph{
 		closeConnectionToHTable();
 	}
 	
+	public void populate(String datafile,String user){
+		
+		FriendIDs ids;
+		FriendsInfo info;
+		if(user.equals("annie")){
+			ids = new FriendIDs('F', 100008415518168L);
+			info = new FriendsInfo('F', 100008415518168L);
+		}else{
+			ids = new FriendIDs('F', 100008467024903L);
+			info = new FriendsInfo('F', 100008467024903L);
+		}
+		
+		BufferedReader br = null;
+		String line;
+		try {
+			br = new BufferedReader(new FileReader(datafile));
+			while ((line = br.readLine()) != null) {
+				if(!line.equals("")){
+					String[] parts = line.split("\t");
+					String id = parts[0];
+					String name = parts[1];
+					String pic = parts[2];
+					ids.addFriend(Long.parseLong(id.substring(1)));
+					info.addFriendName(name);
+					info.addFriendImage(pic);
+				}
+			}
+			br.close();
+			LinkedList<Put> puts = new LinkedList<Put>();
+			puts.add(storeFriend(ids));
+			puts.add(storeFriendInfo(info));
+			commitUpdates(puts);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
 	public static void main(String[] args) {
 		
 		System.out.println("This program manages the ModisUsers Hbase table.");
@@ -252,7 +302,7 @@ public class UserGraph{
 		System.out.println("In order to delete ModisUsers table press:\td/D");
 		System.out.println("In order to delete giagkos user press:\tdu");
 		System.out.println("In order to get a specific row press:\tg");
-		
+		System.out.println("In order to populate:\tp");
 		try{
 			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 			String option= br.readLine();
@@ -279,6 +329,9 @@ public class UserGraph{
 				}
 				UserGraph table = new UserGraph();
 				table.getSpecificRow(args[0]);
+			}else if(option.equals("p")){
+				UserGraph schema = new UserGraph();
+				schema.populate(args[0],args[1]);
 			}
 			else System.out.println("Invalid option.");
 			

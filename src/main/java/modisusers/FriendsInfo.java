@@ -24,6 +24,11 @@ public class FriendsInfo extends Compressor{
 	private LinkedList<String> friendsImages;
 	
 	private char socialNetwork;
+	
+	public FriendsInfo(){
+		friendNames = new LinkedList<String>();
+		friendsImages = new LinkedList<String>();
+	}
 
 	public FriendsInfo(char sn,long id){
 		
@@ -146,10 +151,10 @@ public class FriendsInfo extends Compressor{
 			friendNames.add(name);
 		}
 		
-		System.out.println("names are ok!");
-		for(String s:friendNames){
-			System.out.print(s);
-		}
+//		System.out.println("names are ok!");
+//		for(String s:friendNames){
+//			System.out.print(s);
+//		}
 		
 		this.friendsImages = new LinkedList<>();
 		int sizeOfFriendImgList = buffer.getInt(index);

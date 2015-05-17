@@ -25,6 +25,10 @@ public class FriendIDs extends Compressor{
 	private LinkedList<byte[]> friends;
 	
 	private char socialNetwork;
+	
+	public FriendIDs(){
+		friends = new LinkedList<byte[]>();
+	}
 
 	public FriendIDs(char sn,long id){
 		
